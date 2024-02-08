@@ -4,14 +4,28 @@ Created on Wed Jan 31 20:28:25 2024
 
 @author: John
 """
-from bot_logic import parse_message as pm
 from bot_utils import bot_operations
+from bot_logic.message_parser import MessageParser
 
 # Create a bot instance
 bot = bot_operations.initialize_bot()
 
 def send_debug_message(message):
-    product, date_1, date_2, interval, image_type = pm.parse_message(message.text)
+        
+    # Parse the message    
+    # instantiate the MessageParser object
+    parser = MessageParser()
+    # split the message into a list of words
+    words = parser.split_message(message.text)
+    # fetch a product
+    product = parser.get_product(words)
+    # fetch dates
+    date_1, date_2 = parser.find_minmax_dates(words)
+    # fetch date interval (it determines whether the output of the bot is annual, monthly, or daily data)
+    interval = parser.get_interval(date_1, date_2)
+    # fetch image type (it determines whether a bot should reply with an image and which type of image)
+    image_type = parser.get_image_type(words)
+    
     bot.send_message(message.from_user.id,
                      f"```\n"
                      f"product: {product}\n"
