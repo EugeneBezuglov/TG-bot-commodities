@@ -9,17 +9,17 @@ import re
 class MessageParser:
     def __init__(self):
         # Create tuples for each of the commodities to cover typos
-        self.gas = ('газ', 'гас', 'газз', 'ггаз', 'gas', 'natural gas')
-        self.brent = ('брент', 'brent', 'нефть','бренд', 'brent', 'oil', 'brent oil')
+        self.gas = ('газ', 'гас', 'газз', 'ггаз', 'gas', 'natural gas', 'Natural Gas', 'Gas')
+        self.brent = ('брент', 'brent', 'нефть','бренд', 'brent', 'oil', 'brent oil', 'Brent')
         self.wti = ('wti', 'нефть wti', 'WTI', 'wti oil')
         self.coffee = ('coffee', 'кофе', 'Coffee', 'Кофе')
-        self.copper = ('copper', 'медь')
-        self.aluminum = ('aluminum', 'алюминий')
-        self.cotton = ('cotton', 'хлопок')
-        self.sugar = ('sugar', 'сахар')
-        self.corn = ('corn', 'кукуруза')
+        self.copper = ('copper', 'медь', 'Copper')
+        self.aluminum = ('aluminum', 'алюминий', 'Aluminum')
+        self.cotton = ('cotton', 'хлопок', 'Cotton')
+        self.sugar = ('sugar', 'сахар', 'Sugar')
+        self.corn = ('corn', 'кукуруза', 'Corn')
         self.wheat = ('пшеница', 'пшенница', 'пшница', 'Пшеница', 'wheat', 'Wheat', 'зерно')
-        self.global_commodities_index = ('global index', 'global', 'index', 'gci', 'GCI', 'глобальный индекс', 'индекс')
+        self.global_commodities_index = ('global index', 'global', 'index', 'gci', 'GCI', 'глобальный индекс', 'индекс', 'Global Commodities Index', 'Index')
         
         # Use these tuples as keys
         self.commodity_mapping = {
