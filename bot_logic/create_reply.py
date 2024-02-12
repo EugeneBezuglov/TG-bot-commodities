@@ -103,7 +103,10 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type):
     # if no dates, return the latest available price.
     if not date_1:
         
-        reply_str = str(df['name'][0]) + ': ' + str(df['price'][0]) + ', дата: ' + str(df['date'][0])
+        reply_str = (name+' (latest price)'+': '+price
+                     +', date/period: '+str(df['date'][0])
+                     +', unit: '+unit
+                    )
         return reply_str
 
     # if one date, return the price for the date.
