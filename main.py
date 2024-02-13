@@ -128,7 +128,7 @@ def get_text_messages(message):
         conn = db_operations.db_connect()
         
         # create SQL query
-        sql, params = db_operations.create_sql_query(product, date_1, date_2, interval)            
+        sql, params = db_operations.create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)            
 
         # fetch data
         df = pd.read_sql_query(sql, conn, params=params)

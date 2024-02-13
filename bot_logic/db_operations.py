@@ -22,9 +22,9 @@ def db_connect():
     return psycopg2.connect(dbname=db_name, user=db_login, password=db_password, host=db_host)
 
 
-def create_sql_query(product, date_1, date_2, interval):
+def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position):
     
-    if product and not date_1:
+    if product and not date_1 and not rank_type:
         fields = "name, value AS price, date, interval, unit, symbol"
         table = "commodities"
         conditions = "name = %s"
@@ -35,7 +35,29 @@ def create_sql_query(product, date_1, date_2, interval):
                f"ORDER BY {order};")
         params = (product,)
     
-    if product and date_1 and not date_2:
+    if product and not date_1 and rank_type and not rank_position:
+        if rank_type == 'top' or rank_type == 'max':
+            fields = "name, value AS price, date, interval, unit, symbol"
+            table = "commodities"
+            conditions = "name = %s"
+            order = "price DESC LIMIT 1"
+            sql = (f"SELECT {fields} "
+                   f"FROM {table} "
+                   f"WHERE {conditions} "
+                   f"ORDER BY {order};")
+            params = (product,)
+        elif rank_type == 'bottom' or rank_type == 'min':
+            fields = "name, value AS price, date, interval, unit, symbol"
+            table = "commodities"
+            conditions = "name = %s"
+            order = "price ASC LIMIT 1"
+            sql = (f"SELECT {fields} "
+                   f"FROM {table} "
+                   f"WHERE {conditions} "
+                   f"ORDER BY {order};")
+            params = (product,)            
+    
+    if product and date_1 and not date_2 and not rank_type:
         fields = "name, SUM(value) / COUNT(value) AS price, interval, unit"
         table = "commodities"
         group_by = "name, interval, unit"
@@ -58,7 +80,7 @@ def create_sql_query(product, date_1, date_2, interval):
             else None
         )       
     
-    if product and date_1 and date_2:
+    if product and date_1 and date_2 and not rank_type:
         if interval == 'annually':
             fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit"
             table = "commodities"
