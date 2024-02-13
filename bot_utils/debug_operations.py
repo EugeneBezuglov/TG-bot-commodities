@@ -25,6 +25,8 @@ def send_debug_message(message):
     interval = parser.get_interval(date_1, date_2)
     # fetch image type (it determines whether a bot should reply with an image and which type of image)
     image_type = parser.get_image_type(words)
+    # fetch rank type and position (it's responsible for returning top/bottom N values or max/min Nth value)
+    rank_type, rank_position = parser.get_price_ranking(words)
     
     bot.send_message(message.from_user.id,
                      f"```\n"
@@ -33,4 +35,6 @@ def send_debug_message(message):
                      f"date_2: {date_2}\n"
                      f"interval: {interval}\n"
                      f"image_type: {image_type}\n"
+                     f"rank: {rank_type}\n"
+                     f"position: {rank_position}\n"
                      f"```", parse_mode='Markdown')    

@@ -110,9 +110,11 @@ def get_text_messages(message):
     interval = parser.get_interval(date_1, date_2)
     # fetch image type (it determines whether a bot should reply with an image and which type of image)
     image_type = parser.get_image_type(words)
+    # fetch rank type and position (it's responsible for returning top/bottom N values or max/min Nth value)
+    rank_type, rank_position = parser.get_price_ranking(words)
 
     # Send parsed variables. Comment out before deployment
-    #debug_operations.send_debug_message(message)
+    debug_operations.send_debug_message(message)
     
     # Guard Clauses
     # check if a user sends a correct product name / correct help command

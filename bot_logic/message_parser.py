@@ -170,4 +170,37 @@ class MessageParser:
             image_type = next((self.image_type_mapping[image_type_tuple] for image_type_tuple in self.image_type_mapping.keys() if any(string in image_type_tuple for string in strings_list)), '')
         else:
             image_type = None
-        return image_type        
+        return image_type
+    
+    
+    def get_price_ranking(self, strings_list):
+        # top N -> return a table of N highest prices and corresponding dates/periods
+        # bottom N -> return a table of N lowest prices and corresponding dates/periods
+        # max N -> return an Nth highest price value and the corresponding date/period
+        # mix N ->return an Nth lowest price value and the corresponding date/period
+        rank_type = None
+        rank_type_count = 0
+        rank_position = None
+        valid_keywords = {'top', 'bottom', 'max', 'min'}
+        
+        # find the rank type. If multiple types, return none
+        for string in strings_list:
+            if string in valid_keywords:
+                rank_type = string
+                rank_type_count += 1
+                if rank_type_count > 1:
+                    rank_type = None
+                    rank_position = None
+                    break
+
+        # if a valid rank type is found, check for a rank position
+        if rank_type is not None:
+            # Find the index of the rank_type in the strings_list
+            rank_type_index = strings_list.index(rank_type)    
+            # Check the next string after the rank_type for a valid rank position
+            if rank_type_index + 1 < len(strings_list):
+                next_string = strings_list[rank_type_index + 1]
+                if next_string.isdigit() and 1 <= int(next_string) <= 10:
+                    rank_position = int(next_string)
+        
+        return rank_type, rank_position
