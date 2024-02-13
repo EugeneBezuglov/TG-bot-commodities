@@ -11,9 +11,9 @@ from bot_utils import bot_operations
 # Create a bot instance
 bot = bot_operations.initialize_bot()
 
-def send_reply(df, product, date_1, date_2, interval, image_type, message):
+def send_reply(df, product, date_1, date_2, interval, image_type, rank_type, rank_position, message):
     
-    text_reply = create_reply.create_reply_string(df, product, date_1, date_2, interval, image_type)
+    text_reply = create_reply.create_reply_string(df, product, date_1, date_2, interval, image_type, rank_type, rank_position)
 
     if text_reply:
                 

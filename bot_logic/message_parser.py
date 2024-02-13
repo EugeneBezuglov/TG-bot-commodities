@@ -200,7 +200,7 @@ class MessageParser:
             # Check the next string after the rank_type for a valid rank position
             if rank_type_index + 1 < len(strings_list):
                 next_string = strings_list[rank_type_index + 1]
-                if next_string.isdigit() and 1 <= int(next_string) <= 10:
+                if next_string.isdigit() and 1 <= int(next_string):
                     rank_position = int(next_string)
         
         return rank_type, rank_position

@@ -149,7 +149,7 @@ def get_text_messages(message):
             conn.close()
     
     # generate and send a reply
-    send_reply.send_reply(df, product, date_1, date_2, interval, image_type, message)  
+    send_reply.send_reply(df, product, date_1, date_2, interval, image_type, rank_type, rank_position, message)  
     
     # remove image files (images are created when the reply is not a string)
     file_operations.delete_images(df_image_filenames = create_reply.create_table_png(df))

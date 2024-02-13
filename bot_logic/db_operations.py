@@ -55,7 +55,37 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f"ORDER BY {order};")
-            params = (product,)            
+            params = (product,)
+            
+    if product and not date_1 and rank_type and rank_position:
+        if rank_type == 'max':
+            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value DESC) as rnk"
+            table = "commodities"
+            conditions = "name = %s"
+            order = ""
+            sql = (f"WITH ranked AS "
+                   f"("
+                   f"SELECT {fields} "
+                   f"FROM {table} "
+                   f"WHERE {conditions} "
+                   f")"
+                   f"SELECT * FROM ranked WHERE rnk = %s")
+            params = (product, rank_position)
+            
+        if rank_type == 'min':
+            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value ASC) as rnk"
+            table = "commodities"
+            conditions = "name = %s"
+            order = ""
+            sql = (f"WITH ranked AS "
+                   f"("
+                   f"SELECT {fields} "
+                   f"FROM {table} "
+                   f"WHERE {conditions} "
+                   f")"
+                   f"SELECT * FROM ranked WHERE rnk = %s")
+            params = (product, rank_position)      
+
     
     if product and date_1 and not date_2 and not rank_type:
         fields = "name, SUM(value) / COUNT(value) AS price, interval, unit"

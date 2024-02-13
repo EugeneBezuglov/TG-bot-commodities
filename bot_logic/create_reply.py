@@ -73,7 +73,7 @@ def create_table_png(df):
     return df_image_filenames
 
 # Create reply string
-def create_reply_string(df, product, date_1, date_2, interval, image_type):
+def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_type, rank_position):
     
     """
     Create a reply string based on the provided parameters.
@@ -101,12 +101,55 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type):
         return reply_str
     
     # if no dates, return the latest available price.
-    if not date_1:
+    if not date_1 and not rank_type:
         
         reply_str = (name+' (latest price)'+': '+price
                      +', date/period: '+str(df['date'][0])
                      +', unit: '+unit
                     )
+        return reply_str
+    
+    if not date_1 and rank_type and not rank_position:
+        if rank_type == 'top' or rank_type == 'max':
+            reply_str = (name+' (highest price)'+': '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )
+        elif rank_type == 'bottom' or rank_type == 'min':
+            reply_str = (name+' (lowest price)'+': '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )            
+        return reply_str
+    
+    if not date_1 and rank_type and rank_position:
+        if rank_type == 'max':
+            if rank_position == 1:
+                suffix = 'st'
+            elif rank_position == 2:
+                suffix = 'nd'
+            elif rank_position == 3:
+                suffix = 'rd'
+            else:
+                suffix = 'th'
+            reply_str = (name+f' ({rank_position}{suffix} highest price)'+': '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )
+        if rank_type == 'min':
+            if rank_position == 1:
+                suffix = 'st'
+            elif rank_position == 2:
+                suffix = 'nd'
+            elif rank_position == 3:
+                suffix = 'rd'
+            else:
+                suffix = 'th'
+            reply_str = (name+f' ({rank_position}{suffix} lowest price)'+': '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )            
+         
         return reply_str
 
     # if one date, return the price for the date.
