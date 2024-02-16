@@ -9,8 +9,8 @@ import re
 class MessageParser:
     def __init__(self):
         # Create tuples for each of the commodities to cover typos
-        self.gas = ('газ', 'гас', 'газз', 'ггаз', 'gas', 'natural gas', 'Natural Gas', 'Gas')
-        self.brent = ('брент', 'brent', 'нефть','бренд', 'brent', 'oil', 'brent oil', 'Brent')
+        self.gas = ('газ', 'gas', 'natural gas', 'Natural Gas', 'Gas')
+        self.brent = ('брент', 'brent', 'нефть', 'brent', 'oil', 'brent oil', 'Brent')
         self.wti = ('wti', 'нефть wti', 'WTI', 'wti oil')
         self.coffee = ('coffee', 'кофе', 'Coffee', 'Кофе')
         self.copper = ('copper', 'медь', 'Copper')
@@ -45,7 +45,14 @@ class MessageParser:
             self.plot: 'plot',
             self.table: 'table'
         }
-
+        # regex pattern to capture dates
+        self.regex_date_pattern = (
+            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])\b'
+            r'|'
+            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])\b'
+            r'|'
+            r'\b(?:19|20)\d{2}\b'
+        )
 
     def split_message(self,string):
         # replace certain chars and convert a string to a list of words
@@ -53,17 +60,8 @@ class MessageParser:
         return words
     
     def find_dates(self,strings_list):
-        # Create regex pattern to capture dates
-        regex_pattern = (
-            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])\b'
-            r'|'
-            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])\b'
-            r'|'
-            r'\b(?:19|20)\d{2}\b'
-        )
-      
         # find all potential dates in the list of words
-        dates_list = re.findall(regex_pattern, ' '.join(strings_list))
+        dates_list = re.findall(self.regex_date_pattern, ' '.join(strings_list))
         return dates_list
      
     def find_minmax_dates(self,strings_list):
@@ -83,17 +81,8 @@ class MessageParser:
             Given strings_list = ['Meeting on 2023-01-15', 'Deadline is 2022-12-31', 'Report due by 2024'],
             the function would return ('2022-12-31', '2024').
         """        
-        # Create regex pattern to capture dates
-        regex_pattern = (
-            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])\b'
-            r'|'
-            r'\b(?:19|20)\d{2}-(?:0[1-9]|1[0-2])\b'
-            r'|'
-            r'\b(?:19|20)\d{2}\b'
-        )   
-        
         # find all potential dates in the list of strings
-        dates = re.findall(regex_pattern, ' '.join(strings_list))
+        dates = re.findall(self.regex_date_pattern, ' '.join(strings_list))
         
         # Sort the list of dates
         sorted_dates = sorted(dates)

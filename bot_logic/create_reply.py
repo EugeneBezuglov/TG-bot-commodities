@@ -89,26 +89,53 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     Returns:
     - (str): The generated reply string.
     """
+    def get_suffix(rank_position):
+        if rank_position == 1:
+            suffix = 'st'
+        elif rank_position == 2:
+            suffix = 'nd'
+        elif rank_position == 3:
+            suffix = 'rd'
+        else:
+            suffix = 'th'
+        return suffix
     
     name = str(df['name'][0])
     price = str(df['price'][0])
     unit = str(df['unit'][0])
 
-    # for more than one date bot returns images, not strings
-    if date_2:
-
+    # guard clause, return type shouldn't be a string
+    if date_2 and not rank_type:
+        reply_str = None
+        return reply_str
+    # guard clause, return type shouldn't be a string
+    if date_2 and rank_type and rank_position:
         reply_str = None
         return reply_str
     
-    # if no dates, return the latest available price.
+    if date_2 and rank_type and not rank_position:
+        if rank_type == 'top' or rank_type == 'max':
+            reply_str = (name+' ('+date_1+' - '+date_2+'), highest '+interval+' price: '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )
+        elif rank_type == 'bottom' or rank_type == 'min':
+            reply_str = (name+' ('+date_1+' - '+date_2+'), lowest '+interval+' price: '+price
+                         +', date/period: '+str(df['date'][0])
+                         +', unit: '+unit
+                        )
+    
+    # if a user sends only the name of a product, return the latest available price.
+    # e.g. 'brent'
     if not date_1 and not rank_type:
         
-        reply_str = (name+' (latest price)'+': '+price
+        reply_str = (name+' (latest price): '+price
                      +', date/period: '+str(df['date'][0])
                      +', unit: '+unit
                     )
         return reply_str
-    
+    # if a user sends only the name of a product and rank type, return the corresponding price.
+    # e.g. 'brent max' or 'brent min'
     if not date_1 and rank_type and not rank_position:
         if rank_type == 'top' or rank_type == 'max':
             reply_str = (name+' (highest price)'+': '+price
@@ -121,34 +148,24 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
                          +', unit: '+unit
                         )            
         return reply_str
-    
+    # if a user sends only the name of a product, rank type and rank_position, return the correspoding price(s)
+    # e.g. 'brent max 3' -> return the 3rd highest price; 'brent min 2' -> return the 2nd lowest prices
     if not date_1 and rank_type and rank_position:
+        suffix = get_suffix(rank_position)
         if rank_type == 'max':
-            if rank_position == 1:
-                suffix = 'st'
-            elif rank_position == 2:
-                suffix = 'nd'
-            elif rank_position == 3:
-                suffix = 'rd'
-            else:
-                suffix = 'th'
             reply_str = (name+f' ({rank_position}{suffix} highest price)'+': '+price
                          +', date/period: '+str(df['date'][0])
                          +', unit: '+unit
                         )
         if rank_type == 'min':
-            if rank_position == 1:
-                suffix = 'st'
-            elif rank_position == 2:
-                suffix = 'nd'
-            elif rank_position == 3:
-                suffix = 'rd'
-            else:
-                suffix = 'th'
             reply_str = (name+f' ({rank_position}{suffix} lowest price)'+': '+price
                          +', date/period: '+str(df['date'][0])
                          +', unit: '+unit
-                        )            
+                        )
+        
+        # if a user sends, say, 'brent top 3', this would require an image reply, hence empty reply_str
+        if rank_type in ['top', 'bottom']:
+            reply_str = None
          
         return reply_str
 
@@ -174,9 +191,3 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
             reply_str = None
   
     return reply_str
-
-
-
-
-
-

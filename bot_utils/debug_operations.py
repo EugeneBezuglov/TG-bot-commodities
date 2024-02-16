@@ -35,6 +35,6 @@ def send_debug_message(message):
                      f"date_2: {date_2}\n"
                      f"interval: {interval}\n"
                      f"image_type: {image_type}\n"
-                     f"rank: {rank_type}\n"
-                     f"position: {rank_position}\n"
+                     f"rank_type: {rank_type}\n"
+                     f"rank_position: {rank_position}\n"
                      f"```", parse_mode='Markdown')    
