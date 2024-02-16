@@ -24,72 +24,85 @@ def db_connect():
 
 def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position):
     
-    if product and not date_1 and not rank_type:
-        fields = "name, value AS price, date, interval, unit, symbol"
-        table = "commodities"
-        conditions = "name = %s"
-        order = "date DESC LIMIT 1"
-        sql = (f"SELECT {fields} "
-               f"FROM {table} "
-               f"WHERE {conditions} "
-               f"ORDER BY {order};")
-        params = (product,)
-    
-    if product and not date_1 and rank_type and not rank_position:
-        if rank_type == 'top' or rank_type == 'max':
+    if product and not date_1:
+        if not rank_type:
             fields = "name, value AS price, date, interval, unit, symbol"
             table = "commodities"
             conditions = "name = %s"
-            order = "price DESC LIMIT 1"
+            order = "date DESC LIMIT 1"
             sql = (f"SELECT {fields} "
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f"ORDER BY {order};")
             params = (product,)
-        elif rank_type == 'bottom' or rank_type == 'min':
+        elif rank_type and not rank_position:
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            #
             fields = "name, value AS price, date, interval, unit, symbol"
             table = "commodities"
             conditions = "name = %s"
-            order = "price ASC LIMIT 1"
+            order = f"price {order_direction} LIMIT 1"
             sql = (f"SELECT {fields} "
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f"ORDER BY {order};")
             params = (product,)
+        elif rank_type and rank_position:
             
-    if product and not date_1 and rank_type and rank_position:
-        if rank_type == 'max':
-            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value DESC) as rnk"
-            table = "commodities"
-            conditions = "name = %s"
-            order = ""
-            sql = (f"WITH ranked AS "
-                   f"("
-                   f"SELECT {fields} "
-                   f"FROM {table} "
-                   f"WHERE {conditions} "
-                   f")"
-                   f"SELECT * FROM ranked WHERE rnk = %s")
-            params = (product, rank_position)
-            
-        if rank_type == 'min':
-            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value ASC) as rnk"
-            table = "commodities"
-            conditions = "name = %s"
-            order = ""
-            sql = (f"WITH ranked AS "
-                   f"("
-                   f"SELECT {fields} "
-                   f"FROM {table} "
-                   f"WHERE {conditions} "
-                   f")"
-                   f"SELECT * FROM ranked WHERE rnk = %s")
-            params = (product, rank_position)
+            # determine order and comparison sign based on rank_type
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            comparison = '<=' if rank_type in ['top', 'bottom'] else '=' if rank_type in ['max', 'min'] else None
         
-        if rank_type == 'top':
-            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value DESC) as rnk"
+            # define common parts of the SQL query
+            fields = f"name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value {order_direction}) as rnk"
             table = "commodities"
             conditions = "name = %s"
+        
+            # construct the final SQL query
+            sql = (
+                f"WITH ranked AS ("
+                f"SELECT {fields} "
+                f"FROM {table} "
+                f"WHERE {conditions} "
+                f") "
+                f"SELECT * FROM ranked WHERE rnk {comparison} %s"
+            )
+            params = (product, rank_position)
+    
+    if product and date_1 and not date_2:
+        if  not rank_type:
+            # Define common parts of the SQL query
+            fields = "name, SUM(value) / COUNT(value) AS price, interval, unit"
+            table = "commodities"
+            group_by = "name, interval, unit"
+            order = "name"        
+        
+            # Determine conditions based on interval
+            if interval == 'annually':
+                conditions = "name = %s AND to_char(date, 'YYYY') = %s"
+                params = (product, date_1)
+            elif interval == 'monthly':
+                conditions = "name = %s AND to_char(date, 'YYYY-MM') = %s"
+                params = (product, date_1)
+            elif interval == 'daily':
+                conditions = "name = %s AND to_char(date, 'YYYY-MM-DD') = %s AND interval = %s"
+                params = (product, date_1, interval)
+            else:
+                pass
+            sql = (
+                f"SELECT {fields} "
+                f"FROM {table} "
+                f"WHERE {conditions} "
+                f"GROUP BY {group_by} "
+                f"ORDER BY {order};"
+                )
+        elif rank_type and not rank_position:
+            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            #
+            fields = f"name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value {order_direction}) as rnk"
+            table = "commodities"
+            conditions = f"name = %s AND TO_CHAR(date, '{date_format}') = %s"
             order = ""
             sql = (f"WITH ranked AS "
                    f"("
@@ -97,13 +110,17 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f")"
-                   f"SELECT * FROM ranked WHERE rnk <= %s")
-            params = (product, rank_position)            
-
-        if rank_type == 'bottom':
-            fields = "name, value AS price, date, interval, unit, symbol, DENSE_RANK() OVER(ORDER BY value ASC) as rnk"
+                   f"SELECT * FROM ranked WHERE rnk = 1")   
+            params = (product, date_1)             
+        elif rank_type and rank_position:
+            
+            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            comparison = '<=' if rank_type in ['top', 'bottom'] else '=' if rank_type in ['max', 'min'] else None
+            #
+            fields = f"name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value {order_direction}) as rnk"
             table = "commodities"
-            conditions = "name = %s"
+            conditions = f"name = %s AND TO_CHAR(date, '{date_format}') = %s"
             order = ""
             sql = (f"WITH ranked AS "
                    f"("
@@ -111,320 +128,59 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f")"
-                   f"SELECT * FROM ranked WHERE rnk <= %s")
-            params = (product, rank_position)  
-
+                   f"SELECT * FROM ranked WHERE rnk {comparison} %s")   
+            params = (product, date_1, rank_position)       
     
-    if product and date_1 and not date_2 and not rank_type:
-        fields = "name, SUM(value) / COUNT(value) AS price, interval, unit"
-        table = "commodities"
-        group_by = "name, interval, unit"
-        order = "name"        
-        conditions = (
-            "name = %s AND to_char(date, 'YYYY') = %s" if interval == 'annually' 
-            else "name = %s AND to_char(date, 'YYYY-MM') = %s" if interval == 'monthly'
-            else "name = %s AND to_char(date, 'YYYY-MM-DD') = %s AND interval = %s" if interval == 'daily'
-            else "failed interval"
-        )
-        sql = (f"SELECT {fields} "
-               f"FROM {table} "
-               f"WHERE {conditions} "
-               f"GROUP BY {group_by} "
-               f"ORDER BY {order};")
-        params = (
-            (product, date_1) if interval == 'annually'
-            else (product, date_1) if interval == 'monthly'
-            else (product, date_1, interval) if interval == 'daily'
-            else None
-        )       
-    
-    if product and date_1 and date_2 and not rank_type:
-        if interval == 'annually':
-            fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit"
+    if product and date_1 and date_2:
+        if not rank_type:
+            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            #
+            fields = f"name, SUM(value) / COUNT(value) as price, TO_CHAR(date, '{date_format}') as date, unit"
             table = "commodities"
-            group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-            order = "TO_CHAR(date, 'YYYY')"
+            group_by = f"name, TO_CHAR(date, '{date_format}'), unit"
+            order = f"TO_CHAR(date, '{date_format}')"
+            conditions = f"name = %s AND TO_CHAR(date, '{date_format}') BETWEEN %s AND %s"
+            sql = (f"SELECT {fields} "
+                   f"FROM {table} "
+                   f"WHERE {conditions} "
+                   f"GROUP BY {group_by} "
+                   f"ORDER BY {order};")
+            params = (product, date_1, date_2)
+        elif rank_type and not rank_position:
+            #
+            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            #    
+            fields = f"name, SUM(value) / COUNT(value) as price, TO_CHAR(date, '{date_format}') as date, unit"
+            table = "commodities"
+            group_by = f"name, TO_CHAR(date, '{date_format}'), unit"
+            order = f"price {order_direction} LIMIT 1"
             conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
             sql = (f"SELECT {fields} "
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f"GROUP BY {group_by} "
                    f"ORDER BY {order};")
-        elif interval == 'monthly':        
-            fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit"
+            params = (product, date_1, date_2)
+        elif rank_type and rank_position:
+            #
+            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
+            comparison = '<=' if rank_type in ['top', 'bottom'] else '=' if rank_type in ['max', 'min'] else None
+            #
+            fields = f"name, SUM(value) / COUNT(value) as price, TO_CHAR(date, '{date_format}') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) {order_direction}) as rnk"
             table = "commodities"
-            group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-            order = "TO_CHAR(date, 'YYYY-MM')"
-            conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-            sql = (f"SELECT {fields} "
+            group_by = f"name, TO_CHAR(date, '{date_format}'), unit"
+            conditions = f"name = %s AND TO_CHAR(date, '{date_format}') BETWEEN %s AND %s"
+            order = ""
+            sql = (f"WITH ranked AS "
+                   f"("
+                   f"SELECT {fields} "
                    f"FROM {table} "
                    f"WHERE {conditions} "
                    f"GROUP BY {group_by} "
-                   f"ORDER BY {order};")
-        elif interval == 'daily': 
-            fields = "name, SUM(value) / COUNT(value) as price, date, unit"
-            table = "commodities"
-            group_by = "name, date, unit"
-            order = "date"
-            conditions = "name = %s AND date BETWEEN %s AND %s"
-            sql = (f"SELECT {fields} "
-                   f"FROM {table} "
-                   f"WHERE {conditions} "
-                   f"GROUP BY {group_by} "
-                   f"ORDER BY {order};") 
-        
-        params = (product, date_1, date_2)
-        
-    
-    
-    
-    
-    if product and date_1 and date_2 and rank_type and not rank_position:
-        if interval == 'annually':
-            if rank_type == 'top' or rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                order = "price DESC LIMIT 1"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};")
-            if rank_type == 'bottom' or rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                order = "price ASC LIMIT 1"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};")
-        elif interval == 'monthly':
-            if rank_type == 'top' or rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                order = "price DESC LIMIT 1"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};")
-            if rank_type == 'bottom' or rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                order = "price ASC LIMIT 1"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};")        
-        elif interval == 'daily':
-            if rank_type == 'top' or rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, date, unit"
-                table = "commodities"
-                group_by = "name, date, unit"
-                order = "price DESC LIMIT 1"
-                conditions = "name = %s AND date BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};") 
-            if rank_type == 'bottom' or rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, date, unit"
-                table = "commodities"
-                group_by = "name, date, unit"
-                order = "price ASC LIMIT 1"
-                conditions = "name = %s AND date BETWEEN %s AND %s"
-                sql = (f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f"ORDER BY {order};")         
-        params = (product, date_1, date_2)
-        
-        
-# !!!!!!!!!!!! stopped here, finish        
-    if product and date_1 and date_2 and rank_type and rank_position:
-        if interval == 'annually':
-            if rank_type == 'top':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'bottom':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s")
-            if rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s")                  
-        elif interval == 'monthly':
-            if rank_type == 'top':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'bottom':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s")
-            if rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s") 
-        elif interval == 'daily':
-            if rank_type == 'top':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM-DD'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'bottom':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM-DD'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk <= %s")
-            if rank_type == 'max':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM-DD'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s")
-            if rank_type == 'min':
-                fields = "name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk"
-                table = "commodities"
-                group_by = "name, TO_CHAR(date, 'YYYY-MM-DD'), unit"
-                conditions = "name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s"
-                order = ""
-                sql = (f"WITH ranked AS "
-                       f"("
-                       f"SELECT {fields} "
-                       f"FROM {table} "
-                       f"WHERE {conditions} "
-                       f"GROUP BY {group_by} "
-                       f")"
-                       f"SELECT * FROM ranked WHERE rnk = %s")    
-        params = (product, date_1, date_2, rank_position)        
+                   f")"
+                   f"SELECT * FROM ranked WHERE rnk {comparison} %s")   
+            params = (product, date_1, date_2, rank_position)   
         
     return sql, params

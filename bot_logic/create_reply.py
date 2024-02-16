@@ -104,6 +104,11 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     price = str(df['price'][0])
     unit = str(df['unit'][0])
 
+    
+    if date_1 and not date_2 and rank_type:
+        reply_str= None
+        return reply_str
+
     # guard clause, return type shouldn't be a string
     if date_2 and not rank_type:
         reply_str = None
@@ -170,7 +175,7 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
         return reply_str
 
     # if one date, return the price for the date.
-    if date_1 and not date_2:
+    if date_1 and not date_2 and not rank_type and not rank_position:
     
         if interval == 'annually':
             reply_str = (name+' (avg. annual price)'+': '+price
