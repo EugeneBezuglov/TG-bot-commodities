@@ -2,4 +2,5 @@
 pyTelegramBotAPI
 psycopg2
 python-decouple
+pytest
 

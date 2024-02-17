@@ -83,16 +83,12 @@ class MessageParser:
         """        
         # find all potential dates in the list of strings
         dates = re.findall(self.regex_date_pattern, ' '.join(strings_list))
-        
         # Sort the list of dates
         sorted_dates = sorted(dates)
-       
         #Extract the earliest date
         min_date = sorted_dates[0] if dates else ''
-        
         # Extract the latest date
         max_date = sorted_dates[-1] if len(sorted_dates) > 1 and sorted_dates[-1] != sorted_dates[0] else ''
-        
         return min_date, max_date
     
     def get_product(self,strings_list):
