@@ -132,6 +132,7 @@ def get_text_messages(message):
 
         # fetch data
         df = pd.read_sql_query(sql, conn, params=params)
+        print(df)
         
         # check if the dataframe is empty
         if df.empty:

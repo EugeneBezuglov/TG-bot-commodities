@@ -6,7 +6,7 @@ This is a test module for MessageParser class.
 
 @author: John
 """
-
+# import pytest
 from bot_logic.message_parser import MessageParser
 
 def test_split_message():
