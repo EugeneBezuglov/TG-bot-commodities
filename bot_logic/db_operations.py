@@ -155,7 +155,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
             table = "commodities"
             group_by = f"name, TO_CHAR(date, '{date_format}'), unit"
             order = f"price {order_direction} LIMIT 1"
-            conditions = "name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s"
+            conditions = f"name = %s AND TO_CHAR(date, '{date_format}') BETWEEN %s AND %s"
             sql = (f"SELECT {fields} "
                    f"FROM {table} "
                    f"WHERE {conditions} "

@@ -49,6 +49,9 @@ def test_db_connect(mock_config):
 
     conn.close()
 
+#if product and not date_1:
+#    if not rank_type:
+
 def test_create_sql_query_not_date_1_and_not_rank_type():
     # Define input parameters
     product = 'Brent'
@@ -90,6 +93,11 @@ def test_create_sql_query_not_date_1_and_not_rank_type():
     assert sql_query == expected_sql_query
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
+
+#if product and not date_1:
+#    if not rank_type:
+#       ...
+#    elif rank_type and not rank_position:
 
 def test_create_sql_query_not_date_1_and_rank_type_top_and_not_rank_position():
     # Define input parameters
@@ -258,6 +266,13 @@ def test_create_sql_query_not_date_1_and_rank_type_min_and_not_rank_position():
     assert sql_query == expected_sql_query
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
+
+#if product and not date_1:
+#    if not rank_type:
+#        ...
+#    elif rank_type and not rank_position:
+#        ...
+#    elif rank_type and rank_position:
     
 def test_create_sql_query_not_date_1_and_rank_type_top_and_rank_position_3():
     # Define input parameters
@@ -435,8 +450,8 @@ def test_create_sql_query_not_date_1_and_rank_type_min_and_rank_position_3():
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-
-
+#if product and date_1 and not date_2:
+#    if  not rank_type:
 
 def test_create_sql_query_date_1_and_not_rank_type_case_annually_interval():
     # Define input parameters
@@ -560,6 +575,11 @@ def test_create_sql_query_date_1_and_not_rank_type_case_daily_interval():
     assert sql_query == expected_sql_query
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
+
+#if product and date_1 and not date_2:
+#    if  not rank_type:
+#        ...
+#    elif rank_type and not rank_position:
 
 def test_create_sql_query_date_1_and_rank_type_top_case_annually_interval():
     # Define input parameters
@@ -929,6 +949,13 @@ def test_create_sql_query_date_1_and_rank_type_min_case_monthly_interval():
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
+#if product and date_1 and not date_2:
+#    if  not rank_type:
+#        ...
+#    elif rank_type and not rank_position:
+#        ...
+#    elif rank_type and rank_position:
+
 def test_create_sql_query_date_1_and_rank_type_top_and_rank_position_3_case_annually_interval():
     # Define input parameters
     product = 'Brent'
@@ -1113,6 +1140,1330 @@ def test_create_sql_query_date_1_and_rank_type_min_and_rank_position_3_case_annu
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-# Add monthly tests
+def test_create_sql_query_date_1_and_rank_type_top_and_rank_position_3_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = None
+    interval = 'monthly'
+    rank_type = 'top'
+    rank_position = 3
 
-# Add date_1 and date_2 tests
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') = %s "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', 3)
+    
+    data = {
+        'name': ['Brent', 'Brent', 'Brent'], 
+        'price': [88.08, 87.93, 87.92], 
+        'date': ['2010-11-11', '2010-11-09', '2010-11-10'], 
+        'interval': ['daily', 'daily', 'daily'], 
+        'unit': ['dollars per barrel', 'dollars per barrel', 'dollars per barrel'], 
+        'rnk': [1, 2, 3]
+        }
+    
+    expected_df = pd.DataFrame(data)
+    # Convert the date string to a datetime.date object
+    expected_df['date'] = pd.to_datetime(expected_df['date']).dt.date
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_and_rank_type_bottom_and_rank_position_3_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = None
+    interval = 'monthly'
+    rank_type = 'bottom'
+    rank_position = 3
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') = %s "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', 3)
+    
+    data = {
+        'name': ['Brent', 'Brent', 'Brent'], 
+        'price': [82.34, 82.37, 83.17], 
+        'date': ['2010-11-22', '2010-11-23', '2010-11-19'], 
+        'interval': ['daily', 'daily', 'daily'], 
+        'unit': ['dollars per barrel', 'dollars per barrel', 'dollars per barrel'], 
+        'rnk': [1, 2, 3]
+        }
+    
+    expected_df = pd.DataFrame(data)
+    # Convert the date string to a datetime.date object
+    expected_df['date'] = pd.to_datetime(expected_df['date']).dt.date
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_and_rank_type_max_and_rank_position_3_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = None
+    interval = 'monthly'
+    rank_type = 'max'
+    rank_position = 3
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') = %s "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', 3)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [87.92], 
+        'date': ['2010-11-10'], 
+        'interval': ['daily'], 
+        'unit': ['dollars per barrel'], 
+        'rnk': [3]
+        }
+    
+    expected_df = pd.DataFrame(data)
+    # Convert the date string to a datetime.date object
+    expected_df['date'] = pd.to_datetime(expected_df['date']).dt.date
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_and_rank_type_min_and_rank_position_3_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = None
+    interval = 'monthly'
+    rank_type = 'min'
+    rank_position = 3
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') = %s "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', 3)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [83.17], 
+        'date': ['2010-11-19'], 
+        'interval': ['daily'], 
+        'unit': ['dollars per barrel'], 
+        'rnk': [3]
+        }
+    
+    expected_df = pd.DataFrame(data)
+    # Convert the date string to a datetime.date object
+    expected_df['date'] = pd.to_datetime(expected_df['date']).dt.date
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+
+#if product and date_1 and date_2:
+#    if not rank_type:
+
+def test_create_sql_query_date_1_date_2_not_rank_type_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = None
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit ORDER BY TO_CHAR(date, 'YYYY');"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011')
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [79.60944444444449, 111.26427419354837], 
+        'date': ['2010', '2011'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_not_rank_type_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = '2010-12'
+    interval = 'monthly'
+    rank_type = None
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit ORDER BY TO_CHAR(date, 'YYYY-MM');"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', '2010-12')
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [85.2747619047619, 91.4468181818182], 
+        'date': ['2010-11', '2010-12'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_not_rank_type_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-02'
+    interval = 'daily'
+    rank_type = None
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit ORDER BY TO_CHAR(date, 'YYYY-MM-DD');"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-02')
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [84.06, 84.71], 
+        'date': ['2010-11-01', '2010-11-02'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+#if product and date_1 and date_2:
+#    if not rank_type:
+#        ...
+#    elif rank_type and not rank_position:
+
+def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'top'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [111.26427419354837], 
+        'date': ['2011'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'max'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [111.26427419354837], 
+        'date': ['2011'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'bottom'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [79.60944444444449], 
+        'date': ['2010'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'min'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [79.60944444444449], 
+        'date': ['2010'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = '2010-12'
+    interval = 'monthly'
+    rank_type = 'top'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', '2010-12')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [91.4468181818182], 
+        'date': ['2010-12'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = '2010-12'
+    interval = 'monthly'
+    rank_type = 'max'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', '2010-12')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [91.4468181818182], 
+        'date': ['2010-12'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = '2010-12'
+    interval = 'monthly'
+    rank_type = 'bottom'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', '2010-12')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [85.2747619047619], 
+        'date': ['2010-11'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11'
+    date_2 = '2010-12'
+    interval = 'monthly'
+    rank_type = 'min'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11', '2010-12')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [85.2747619047619], 
+        'date': ['2010-11'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-02'
+    interval = 'daily'
+    rank_type = 'top'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-02')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [84.71], 
+        'date': ['2010-11-02'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-02'
+    interval = 'daily'
+    rank_type = 'max'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit ORDER BY price DESC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-02')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [84.71], 
+        'date': ['2010-11-02'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-02'
+    interval = 'daily'
+    rank_type = 'bottom'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-02')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [84.06], 
+        'date': ['2010-11-01'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-02'
+    interval = 'daily'
+    rank_type = 'min'
+    rank_position = None
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit ORDER BY price ASC LIMIT 1;"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-02')
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [84.06], 
+        'date': ['2010-11-01'], 
+        'unit': ['dollars per barrel'] 
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+#if product and date_1 and date_2:
+#    if not rank_type:
+#        ...
+#    elif rank_type and not rank_position:
+#        ...
+#    elif rank_type and rank_position:
+
+def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'top'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [111.26427419354837, 79.60944444444449], 
+        'date': ['2011', '2010'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'bottom'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [79.60944444444449, 111.26427419354837], 
+        'date': ['2010', '2011'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'max'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [79.60944444444449], 
+        'date': ['2010'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_rank_position_2_case_annually_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010'
+    date_2 = '2011'
+    interval = 'annually'
+    rank_type = 'min'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010', '2011', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [111.26427419354837], 
+        'date': ['2011'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-08'
+    date_2 = '2010-11'
+    interval = 'monthly'
+    rank_type = 'top'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-08', '2010-11', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [85.2747619047619, 82.66476190476189], 
+        'date': ['2010-11', '2010-10'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-08'
+    date_2 = '2010-11'
+    interval = 'monthly'
+    rank_type = 'bottom'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-08', '2010-11', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [77.03954545454543, 77.8404761904762], 
+        'date': ['2010-08', '2010-09'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-08'
+    date_2 = '2010-11'
+    interval = 'monthly'
+    rank_type = 'max'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-08', '2010-11', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [82.66476190476189], 
+        'date': ['2010-10'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_rank_position_2_case_monthly_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-08'
+    date_2 = '2010-11'
+    interval = 'monthly'
+    rank_type = 'min'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-08', '2010-11', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [77.8404761904762], 
+        'date': ['2010-09'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-05'
+    interval = 'daily'
+    rank_type = 'top'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-05', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [87.05, 86.83], 
+        'date': ['2010-11-05', '2010-11-04'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-05'
+    interval = 'daily'
+    rank_type = 'bottom'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk <= %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-05', 2)
+    
+    data = {
+        'name': ['Brent', 'Brent'], 
+        'price': [84.06, 84.71], 
+        'date': ['2010-11-01', '2010-11-02'], 
+        'unit': ['dollars per barrel', 'dollars per barrel'],
+        'rnk': [1, 2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-05'
+    interval = 'daily'
+    rank_type = 'max'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) DESC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-05', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [86.83], 
+        'date': ['2010-11-04'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()
+
+def test_create_sql_query_date_1_date_2_rank_type_min_rank_position_2_case_daily_interval():
+    # Define input parameters
+    product = 'Brent'
+    date_1 = '2010-11-01'
+    date_2 = '2010-11-05'
+    interval = 'daily'
+    rank_type = 'min'
+    rank_position = 2
+
+    # Call the function to generate the SQL query
+    sql_query, params = create_sql_query(product, date_1, date_2, interval, rank_type, rank_position)
+    
+    # Execute the SQL query against the test database
+    df = pd.read_sql_query(sql_query, db_connect(), params=params)
+
+    # Define the expected SQL query
+    expected_sql_query = (
+        "WITH ranked AS ("
+        "SELECT name, SUM(value) / COUNT(value) as price, TO_CHAR(date, 'YYYY-MM-DD') as date, unit, DENSE_RANK() OVER(ORDER BY SUM(value) / COUNT(value) ASC) as rnk "
+        "FROM commodities "
+        "WHERE name = %s AND TO_CHAR(date, 'YYYY-MM-DD') BETWEEN %s AND %s "
+        "GROUP BY name, TO_CHAR(date, 'YYYY-MM-DD'), unit "
+        ")"
+        "SELECT * FROM ranked WHERE rnk = %s"
+    )
+
+    # Define the expected parameters
+    expected_params = ('Brent', '2010-11-01', '2010-11-05', 2)
+    
+    data = {
+        'name': ['Brent'], 
+        'price': [84.71], 
+        'date': ['2010-11-02'], 
+        'unit': ['dollars per barrel'],
+        'rnk': [2]
+        }
+    
+    expected_df = pd.DataFrame(data)
+
+    # Assert that the generated SQL query and parameters match the expected ones
+    assert sql_query == expected_sql_query
+    assert params == expected_params
+    assert expected_df.to_dict() == df.to_dict()

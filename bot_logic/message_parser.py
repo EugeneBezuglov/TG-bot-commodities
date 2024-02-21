@@ -159,10 +159,6 @@ class MessageParser:
     
     
     def get_price_ranking(self, strings_list):
-        # top N -> return a table of N highest prices and corresponding dates/periods
-        # bottom N -> return a table of N lowest prices and corresponding dates/periods
-        # max N -> return an Nth highest price value and the corresponding date/period
-        # mix N ->return an Nth lowest price value and the corresponding date/period
         rank_type = None
         rank_type_count = 0
         rank_position = None
