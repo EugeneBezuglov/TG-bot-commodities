@@ -6,6 +6,7 @@ Created on Wed Jan 31 18:53:39 2024
 """
 import psycopg2 # to connect to a DB
 from bot_utils import bot_operations
+from sqlalchemy import create_engine
 
 # Explicitly tell config where the settings file is.
 config = bot_operations.get_config()
@@ -18,9 +19,26 @@ def db_connect():
     db_login = config('DB_LOGIN', default='')
     db_name = config('DB_NAME', default='')
     db_host = config('DB_HOST', default='')
+    
+    # Construct the database URL for SQLAlchemy
+    db_url = f'postgresql://{db_login}:{db_password}@{db_host}/{db_name}'
+    
+    # Create an engine and connect to the database
+    engine = create_engine(db_url)
+    connection = engine.connect()    
+            
+    return connection
+
+# Create a database connection
+def db_connect_psycopg2():
+    
+    # Fetch database credentials
+    db_password = config('DB_PASSWORD', default='')
+    db_login = config('DB_LOGIN', default='')
+    db_name = config('DB_NAME', default='')
+    db_host = config('DB_HOST', default='')
             
     return psycopg2.connect(dbname=db_name, user=db_login, password=db_password, host=db_host)
-
 
 def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position):
     

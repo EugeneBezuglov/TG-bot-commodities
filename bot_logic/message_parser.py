@@ -130,7 +130,6 @@ class MessageParser:
         
         return interval        
 
-
     def get_image_type(self,strings_list):
         """
         Extracts an image type from a list of strings based on image type mappings.
@@ -156,7 +155,6 @@ class MessageParser:
         else:
             image_type = None
         return image_type
-    
     
     def get_price_ranking(self, strings_list):
         rank_type = None

@@ -104,7 +104,6 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     price = str(df['price'][0])
     unit = str(df['unit'][0])
 
-    
     if date_1 and not date_2 and rank_type:
         reply_str= None
         return reply_str

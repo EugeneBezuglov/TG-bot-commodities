@@ -8,7 +8,10 @@ Created on Sun Feb 18 22:04:46 2024
 import pytest
 import psycopg2
 import pandas as pd
+#from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Connection
 from bot_logic.db_operations import db_connect
+from bot_logic.db_operations import db_connect_psycopg2
 from bot_logic.db_operations import create_sql_query
 
 # Define a fixture using pytest.fixture decorator.
@@ -35,12 +38,25 @@ def mock_config(monkeypatch):
     # This ensures that when db_connect is called during testing, it will use the mocked configuration.
     monkeypatch.setattr('bot_logic.db_operations.config', mock_config_function)
 
-# Define a test function to verify the behavior of the db_connect function.
 # The test function takes the mock_config fixture as an argument, indicating that it will use the mocked configuration.
 def test_db_connect(mock_config):
     # Call the db_connect function.
     # Since the configuration function is mocked, it will use the mocked credentials for database connection.
     conn = db_connect()
+    # Assert that the returned object is an instance of sqlalchemy.engine.base.Connection.
+    # This ensures that the db_connect function successfully established a database connection.
+    assert isinstance(conn, Connection)
+    # Check if the connection is open (closed attribute is 0), indicating a successful connection.
+    assert conn.closed == 0  
+
+    conn.close()
+
+
+# The test function takes the mock_config fixture as an argument, indicating that it will use the mocked configuration.
+def test_db_connect_psycopg2(mock_config):
+    # Call the db_connect function.
+    # Since the configuration function is mocked, it will use the mocked credentials for database connection.
+    conn = db_connect_psycopg2()
     # Assert that the returned object is an instance of psycopg2.extensions.connection.
     # This ensures that the db_connect function successfully established a database connection.
     assert isinstance(conn, psycopg2.extensions.connection)
