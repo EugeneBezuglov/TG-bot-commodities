@@ -49,6 +49,28 @@ def create_plot_pcot(df, product):
     plt.savefig('plot.png')
     # Clear the current figure to prevent multiple plots in a single run
     plt.clf()
+    
+def create_plot_hist(df, product, interval):
+
+    # Set the style of the plot
+    sns.set(style="whitegrid")
+    
+    # Plot histogram
+    sns.histplot(data=df, x='price', bins=15)
+    
+    # fetch labels
+    date_from = df['date'].iloc[0]
+    date_to = df['date'].iloc[-1]
+    
+    # Add labels and title
+    plt.xlabel('Price')
+    plt.ylabel('Frequency')
+    plt.title(f"{product} {interval} price distribution over {date_from} - {date_to} period")
+    plt.tight_layout()
+    # Save the plot as a PNG image
+    plt.savefig('plot.png')
+    # Clear the current figure to prevent multiple plots in a single run
+    plt.clf()
 
 def create_table_png(df):
     '''

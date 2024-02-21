@@ -23,7 +23,12 @@ def send_reply(df, product, date_1, date_2, interval, image_type, rank_type, ran
         
         create_reply.create_plot_pcot(df, product)
         # send a plot
-        bot.send_photo(message.from_user.id, photo=open('plot.png', 'rb')) 
+        bot.send_photo(message.from_user.id, photo=open('plot.png', 'rb'))
+    elif image_type == 'hist':
+        
+        create_reply.create_plot_hist(df, product, interval)
+        # send a plot
+        bot.send_photo(message.from_user.id, photo=open('plot.png', 'rb'))
     
     else:
         # generate an image

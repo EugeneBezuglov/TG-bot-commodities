@@ -8,7 +8,6 @@ Created on Sun Feb 18 22:04:46 2024
 import pytest
 import psycopg2
 import pandas as pd
-#from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Connection
 from bot_logic.db_operations import db_connect
 from bot_logic.db_operations import db_connect_psycopg2

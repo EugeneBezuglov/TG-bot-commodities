@@ -39,11 +39,13 @@ class MessageParser:
         # Tuples for image types
         self.plot = ('график', 'граф', 'г', 'plot', 'graph', 'line')
         self.table = ('таблица', 'табл', 'т', 'table')
+        self.hist = ('hist', 'histogram', 'гистограмма', 'гисто')
         
         # Use these tuples as keys
         self.image_type_mapping = {
             self.plot: 'plot',
-            self.table: 'table'
+            self.table: 'table',
+            self.hist: 'hist'
         }
         # regex pattern to capture dates
         self.regex_date_pattern = (
