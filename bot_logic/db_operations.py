@@ -96,7 +96,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
             order = "name"        
         
             # Determine conditions based on interval
-            if interval == 'annually':
+            if interval == 'annual':
                 conditions = "name = %s AND to_char(date, 'YYYY') = %s"
                 params = (product, date_1)
             elif interval == 'monthly':
@@ -115,7 +115,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
                 f"ORDER BY {order};"
                 )
         elif rank_type and not rank_position:
-            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            date_format = 'YYYY' if interval == 'annual' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
             order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
             #
             fields = f"name, value AS price, date, interval, unit, DENSE_RANK() OVER(ORDER BY value {order_direction}) as rnk"
@@ -132,7 +132,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
             params = (product, date_1)             
         elif rank_type and rank_position:
             
-            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            date_format = 'YYYY' if interval == 'annual' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
             order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
             comparison = '<=' if rank_type in ['top', 'bottom'] else '=' if rank_type in ['max', 'min'] else None
             #
@@ -151,7 +151,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
     
     if product and date_1 and date_2:
         if not rank_type:
-            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            date_format = 'YYYY' if interval == 'annual' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
             #
             fields = f"name, SUM(value) / COUNT(value) as price, TO_CHAR(date, '{date_format}') as date, unit"
             table = "commodities"
@@ -166,7 +166,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
             params = (product, date_1, date_2)
         elif rank_type and not rank_position:
             #
-            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            date_format = 'YYYY' if interval == 'annual' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
             order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
             #    
             fields = f"name, SUM(value) / COUNT(value) as price, TO_CHAR(date, '{date_format}') as date, unit"
@@ -182,7 +182,7 @@ def create_sql_query(product, date_1, date_2, interval, rank_type, rank_position
             params = (product, date_1, date_2)
         elif rank_type and rank_position:
             #
-            date_format = 'YYYY' if interval == 'annually' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
+            date_format = 'YYYY' if interval == 'annual' else 'YYYY-MM' if interval == 'monthly' else 'YYYY-MM-DD'
             order_direction = 'DESC' if rank_type in ['top','max'] else 'ASC' if rank_type in ['bottom', 'min'] else None
             comparison = '<=' if rank_type in ['top', 'bottom'] else '=' if rank_type in ['max', 'min'] else None
             #

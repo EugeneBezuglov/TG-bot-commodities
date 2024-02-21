@@ -468,12 +468,12 @@ def test_create_sql_query_not_date_1_and_rank_type_min_and_rank_position_3():
 #if product and date_1 and not date_2:
 #    if  not rank_type:
 
-def test_create_sql_query_date_1_and_not_rank_type_case_annually_interval():
+def test_create_sql_query_date_1_and_not_rank_type_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = None
     rank_position = None
 
@@ -596,12 +596,12 @@ def test_create_sql_query_date_1_and_not_rank_type_case_daily_interval():
 #        ...
 #    elif rank_type and not rank_position:
 
-def test_create_sql_query_date_1_and_rank_type_top_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_top_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'top'
     rank_position = None
 
@@ -642,12 +642,12 @@ def test_create_sql_query_date_1_and_rank_type_top_case_annually_interval():
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_and_rank_type_max_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_max_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'max'
     rank_position = None
 
@@ -688,12 +688,12 @@ def test_create_sql_query_date_1_and_rank_type_max_case_annually_interval():
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_and_rank_type_bottom_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_bottom_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'bottom'
     rank_position = None
 
@@ -734,12 +734,12 @@ def test_create_sql_query_date_1_and_rank_type_bottom_case_annually_interval():
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
     
-def test_create_sql_query_date_1_and_rank_type_min_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_min_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'min'
     rank_position = None
 
@@ -971,12 +971,12 @@ def test_create_sql_query_date_1_and_rank_type_min_case_monthly_interval():
 #        ...
 #    elif rank_type and rank_position:
 
-def test_create_sql_query_date_1_and_rank_type_top_and_rank_position_3_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_top_and_rank_position_3_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'top'
     rank_position = 3
 
@@ -1017,12 +1017,12 @@ def test_create_sql_query_date_1_and_rank_type_top_and_rank_position_3_case_annu
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_and_rank_type_bottom_and_rank_position_3_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_bottom_and_rank_position_3_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'bottom'
     rank_position = 3
 
@@ -1063,12 +1063,12 @@ def test_create_sql_query_date_1_and_rank_type_bottom_and_rank_position_3_case_a
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_and_rank_type_max_and_rank_position_3_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_max_and_rank_position_3_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'max'
     rank_position = 3
 
@@ -1109,12 +1109,12 @@ def test_create_sql_query_date_1_and_rank_type_max_and_rank_position_3_case_annu
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_and_rank_type_min_and_rank_position_3_case_annually_interval():
+def test_create_sql_query_date_1_and_rank_type_min_and_rank_position_3_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = None
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'min'
     rank_position = 3
 
@@ -1343,12 +1343,12 @@ def test_create_sql_query_date_1_and_rank_type_min_and_rank_position_3_case_mont
 #if product and date_1 and date_2:
 #    if not rank_type:
 
-def test_create_sql_query_date_1_date_2_not_rank_type_case_annually_interval():
+def test_create_sql_query_date_1_date_2_not_rank_type_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = None
     rank_position = None
 
@@ -1468,12 +1468,12 @@ def test_create_sql_query_date_1_date_2_not_rank_type_case_daily_interval():
 #        ...
 #    elif rank_type and not rank_position:
 
-def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'top'
     rank_position = None
 
@@ -1508,12 +1508,12 @@ def test_create_sql_query_date_1_date_2_rank_type_top_not_rank_position_case_ann
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'max'
     rank_position = None
 
@@ -1548,12 +1548,12 @@ def test_create_sql_query_date_1_date_2_rank_type_max_not_rank_position_case_ann
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'bottom'
     rank_position = None
 
@@ -1588,12 +1588,12 @@ def test_create_sql_query_date_1_date_2_rank_type_bottom_not_rank_position_case_
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'min'
     rank_position = None
 
@@ -1955,12 +1955,12 @@ def test_create_sql_query_date_1_date_2_rank_type_min_not_rank_position_case_dai
 #        ...
 #    elif rank_type and rank_position:
 
-def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'top'
     rank_position = 2
 
@@ -1999,12 +1999,12 @@ def test_create_sql_query_date_1_date_2_rank_type_top_rank_position_2_case_annua
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'bottom'
     rank_position = 2
 
@@ -2043,12 +2043,12 @@ def test_create_sql_query_date_1_date_2_rank_type_bottom_rank_position_2_case_an
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'max'
     rank_position = 2
 
@@ -2087,12 +2087,12 @@ def test_create_sql_query_date_1_date_2_rank_type_max_rank_position_2_case_annua
     assert params == expected_params
     assert expected_df.to_dict() == df.to_dict()
 
-def test_create_sql_query_date_1_date_2_rank_type_min_rank_position_2_case_annually_interval():
+def test_create_sql_query_date_1_date_2_rank_type_min_rank_position_2_case_annual_interval():
     # Define input parameters
     product = 'Brent'
     date_1 = '2010'
     date_2 = '2011'
-    interval = 'annually'
+    interval = 'annual'
     rank_type = 'min'
     rank_position = 2
 

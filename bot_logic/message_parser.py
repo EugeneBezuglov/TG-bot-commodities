@@ -124,9 +124,9 @@ class MessageParser:
         if date_1 and date_2:
             min_len = min(len(date_1), len(date_2))
             # assign the interval based of the min_len value
-            interval = 'annually' if min_len == 4 else 'monthly' if min_len == 7 else 'daily' if min_len == 10 else None 
+            interval = 'annual' if min_len == 4 else 'monthly' if min_len == 7 else 'daily' if min_len == 10 else None 
         elif date_1 and not date_2:
-            interval = 'annually' if len(date_1) == 4 else 'monthly' if len(date_1) == 7 else 'daily' if len(date_1) == 10 else None
+            interval = 'annual' if len(date_1) == 4 else 'monthly' if len(date_1) == 7 else 'daily' if len(date_1) == 10 else None
         else:
             interval = None
         

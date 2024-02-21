@@ -105,7 +105,7 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     - product (str): The name of the product.
     - date_1 (str): The start date.
     - date_2 (str): The end date.
-    - interval (str): The time interval for the data (e.g., 'annually').
+    - interval (str): The time interval for the data (e.g., 'annual').
     - image_type (str): The type of image ('plot', 'table', etc.).
 ​
     Returns:
@@ -198,7 +198,7 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     # if one date, return the price for the date.
     if date_1 and not date_2 and not rank_type and not rank_position:
     
-        if interval == 'annually':
+        if interval == 'annual':
             reply_str = (name+' (avg. annual price)'+': '+price
                          +', period: '+date_1
                          +', unit: '+unit
