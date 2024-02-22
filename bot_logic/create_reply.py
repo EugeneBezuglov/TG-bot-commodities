@@ -11,7 +11,7 @@ from matplotlib.dates import DateFormatter
 import pandas as pd
 
 
-def create_plot_pcot(df, product):
+def create_plot_line(df, product):
     '''
     Create a line plot of price change over time
     
@@ -112,39 +112,29 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     - (str): The generated reply string.
     """
     def get_suffix(rank_position):
-        if rank_position == 1:
-            suffix = 'st'
-        elif rank_position == 2:
-            suffix = 'nd'
-        elif rank_position == 3:
-            suffix = 'rd'
-        else:
-            suffix = 'th'
-        return suffix
+        suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
+        return suffixes.get(rank_position, 'th')
     
     name = str(df['name'][0])
     price = str(df['price'][0])
     unit = str(df['unit'][0])
-
-    if date_1 and not date_2 and rank_type:
-        reply_str= None
-        return reply_str
-
-    # guard clause, return type shouldn't be a string
-    if date_2 and not rank_type:
-        reply_str = None
-        return reply_str
-    # guard clause, return type shouldn't be a string
-    if date_2 and rank_type and rank_position:
-        reply_str = None
-        return reply_str
     
-    if date_2 and rank_type and not rank_position:
-        if rank_type == 'top' or rank_type == 'max':
-            reply_str = (name+' ('+date_1+' - '+date_2+'), highest '+interval+' price: '+price
-                         +', date/period: '+str(df['date'][0])
-                         +', unit: '+unit
-                        )
+    # Guard Clause: return type shouldn't be a string
+    if date_1 and not date_2 and rank_type:
+        return None
+
+    # Guard Clause: return type shouldn't be a string
+    if date_1 and date_2:
+        if not rank_type or (rank_type and rank_position):
+            return None
+    
+    if date_1 and date_2 and rank_type and not rank_position:
+        if rank_type in ['top', 'max']:
+            reply_str = (
+                f"{product} ({date_1} - {date_2}), highest {interval} price: {price}, "
+                f"date/period: {df['date'][0]}, unit: {unit}"
+                )
+            
         elif rank_type == 'bottom' or rank_type == 'min':
             reply_str = (name+' ('+date_1+' - '+date_2+'), lowest '+interval+' price: '+price
                          +', date/period: '+str(df['date'][0])
@@ -154,7 +144,6 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
     # if a user sends only the name of a product, return the latest available price.
     # e.g. 'brent'
     if not date_1 and not rank_type:
-        
         reply_str = (name+' (latest price): '+price
                      +', date/period: '+str(df['date'][0])
                      +', unit: '+unit
@@ -192,7 +181,6 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
         # if a user sends, say, 'brent top 3', this would require an image reply, hence empty reply_str
         if rank_type in ['top', 'bottom']:
             reply_str = None
-         
         return reply_str
 
     # if one date, return the price for the date.

@@ -69,7 +69,7 @@ def test_get_interval_case1():
     date_1 = '2000'
     date_2 = '2000-10-01'
     result = parser.get_interval(date_1, date_2)
-    expected_result = 'annually'
+    expected_result = 'annual'
     assert result == expected_result
 
 def test_get_interval_case2():
@@ -78,7 +78,7 @@ def test_get_interval_case2():
     date_1 = '2000-10-01'
     date_2 = '2000'
     result = parser.get_interval(date_1, date_2)
-    expected_result = 'annually'
+    expected_result = 'annual'
     assert result == expected_result
 
 def test_get_interval_case3():
@@ -123,7 +123,7 @@ def test_get_interval_case7():
     date_1 = '2000'
     date_2 = ''
     result = parser.get_interval(date_1, date_2)
-    expected_result = 'annually'
+    expected_result = 'annual'
     assert result == expected_result
 
 def test_get_image_type_case1():
@@ -233,21 +233,3 @@ def test_get_price_ranking_case9():
     result = parser.get_price_ranking(input_list)
     expected_result = (None, None)
     assert result == expected_result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
