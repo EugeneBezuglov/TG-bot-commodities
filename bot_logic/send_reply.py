@@ -24,7 +24,6 @@ def send_reply(df, product, date_1, date_2, interval, image_type, rank_type, ran
             create_reply.create_plot_line(df, product)
         elif image_type == 'hist':
             create_reply.create_plot_hist(df, product, interval)  
-            
         bot.send_photo(message.from_user.id, photo=open('plot.png', 'rb'))
     
     else:

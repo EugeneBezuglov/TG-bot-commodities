@@ -114,7 +114,7 @@ def get_text_messages(message):
     rank_type, rank_position = parser.get_price_ranking(words)
 
     # Send parsed variables. Comment out before deployment
-    debug_operations.send_debug_message(message)
+    #debug_operations.send_debug_message(message)
     
     # Guard Clauses
     # check if a user sends a correct product name / correct help command
@@ -144,6 +144,8 @@ def get_text_messages(message):
         logging.error(error_message, exc_info=True)  # Log the error with traceback information
         
     finally:
+        # round price
+        df['price'] = round(df['price'], 2)
         # close database connection
         if conn:
             conn.close()

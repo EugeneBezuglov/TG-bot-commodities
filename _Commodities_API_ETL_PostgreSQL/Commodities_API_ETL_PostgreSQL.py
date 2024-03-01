@@ -17,6 +17,7 @@ import psycopg2
 import psycopg2.extras as extras
 from datetime import datetime
 import pytz
+import os
 
 
 # ## Step 1: Retrieve Data from Alphavantage APIs
@@ -40,6 +41,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Natural Gas')
 print(data.keys())
 
 
@@ -86,6 +88,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Brent')
 print(data.keys())
 
 
@@ -131,6 +134,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched WTI')
 print(data.keys())
 
 
@@ -176,6 +180,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Copper')
 print(data.keys())
 
 
@@ -221,6 +226,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Aluminum')
 print(data.keys())
 
 
@@ -266,6 +272,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Wheat')
 print(data.keys())
 
 
@@ -311,6 +318,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Corn')
 print(data.keys())
 
 
@@ -356,6 +364,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Cotton')
 print(data.keys())
 
 
@@ -401,6 +410,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Sugar')
 print(data.keys())
 
 
@@ -446,6 +456,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Coffee')
 print(data.keys())
 
 
@@ -491,6 +502,7 @@ r = requests.get(url)
 data = r.json()
 
 # explore the collected data
+print('Fetched Global Commodities Index')
 print(data.keys())
 
 
@@ -562,7 +574,7 @@ df.dtypes
 try:
     # try to connect to the DB
     conn = psycopg2.connect(dbname='commodities', user='postgres', password='11112222', host='localhost')
-    print('Connected successfully')
+    print('Connected to commodities database successfully')
 except:
     # if connections fails
     print('Can`t establish connection to database')
@@ -599,9 +611,14 @@ def upsert_values(conn, df, table):
         return 1
     cursor.close()
     # write log
-    with open('D:\Data Analysis\logs\commodities_log.txt', 'a') as log:
+    log_file_path = os.path.join(os.getcwd(), 'commodities_log.txt')
+    # Check if the log file exists, if not, create it
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w'):
+            pass  # This just creates an empty file
+    with open(log_file_path, 'a') as log:
         log.write('\n%s\n%s' %(logtime, message))
-        log.close()
+        #log.close() no need when used with `with open()`
 
 
 # In[ ]:

@@ -116,7 +116,7 @@ def create_reply_string(df, product, date_1, date_2, interval, image_type, rank_
         return suffixes.get(rank_position, 'th')
     
     name = str(df['name'][0])
-    price = str(df['price'][0])
+    price = str(round(df['price'][0], 2))
     unit = str(df['unit'][0])
     
     # Guard Clause: return type shouldn't be a string
